@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrar Delitos - HelpMeIUD</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">HelpMeIUD Admin</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="admin-manage-crimes.html">Administrar Delitos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="admin-manage-users.html">Administrar Usuarios</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Cerrar Sesión</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="text-center">Administrar Delitos</h1>
+        <div class="row mt-4">
+            <div class="col-md-6 offset-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        Actualizar o Eliminar Delito
+                    </div>
+                    <div class="card-body">
+                        <form id="manageCrimeForm">
+                            <div class="form-group">
+                                <label for="crimeId">ID del Delito</label>
+                                <input type="number" class="form-control" id="crimeId" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="crimeDescription">Descripción del Delito</label>
+                                <input type="text" class="form-control" id="crimeDescription" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="crimeLocation">Ubicación del Delito</label>
+                                <input type="text" class="form-control" id="crimeLocation" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Actualizar Delito</button>
+                            <button type="button" class="btn btn-danger btn-block" id="deleteCrimeButton">Eliminar Delito</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <h3>Lista de Delitos</h3>
+                <ul class="list-group" id="crimeList">
+                    <!-- Los delitos serán añadidos aquí dinámicamente -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#manageCrimeForm').on('submit', function(event) {
+                event.preventDefault();
+                // Lógica para actualizar el delito
+                var crimeId = $('#crimeId').val();
+                var crimeDescription = $('#crimeDescription').val();
+                var crimeLocation = $('#crimeLocation').val();
+
+                $.ajax({
+                    url: '/api/delitos/' + crimeId,
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({description: crimeDescription, location: crimeLocation}),
+                    success: function(response) {
+                        alert('Delito actualizado exitosamente');
+                        fetchCrimes();
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Error al actualizar el delito');
+                    }
+                });
+            });
+
+            $('#deleteCrimeButton').on('click', function() {
+                // Lógica para eliminar el delito
+                var crimeId = $('#crimeId').val();
+
+                $.ajax({
+                    url: '/api/delitos/' + crimeId,
+                    type: 'DELETE',
+                    success: function(response) {
+                        alert('Delito eliminado exitosamente');
+                        fetchCrimes();
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Error al eliminar el delito');
+                    }
+                });
+            });
+
+            // Obtener y mostrar la lista de delitos
+            function fetchCrimes() {
+                $.ajax({
+                    url: '/api/delitos',
+                    type: 'GET',
+                    success: function(response) {
+                        $('#crimeList').empty();
+                        response.forEach(function(crime) {
+                            $('#crimeList').append('<li class="list-group-item">ID: ' + crime.id + ' - ' + crime.description + ' - Ubicación: ' + crime.location + '</li>');
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Error al obtener la lista de delitos');
+                    }
+                });
+            }
+
+            fetchCrimes();
+        });
+    </script>
+</body>
+</html>
